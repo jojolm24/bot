@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Bot - JojoLM24</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#23272a] text-white font-sans flex items-center justify-center min-h-screen">
+
+    <div id="login-card" class="bg-[#2c2f33] p-10 rounded-xl shadow-2xl text-center border border-gray-700 w-full max-w-sm">
+        <div class="w-20 h-20 bg-indigo-500 rounded-full mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg">🤖</div>
+        <h1 class="text-2xl font-bold mb-2">Bot Dashboard</h1>
+        <p class="text-gray-400 mb-8 text-sm">Connectez-vous pour accéder aux statistiques du bot.</p>
+        <button onclick="loginWithDiscord()" class="w-full bg-[#5865F2] hover:bg-[#4752C4] py-3 rounded-lg font-bold transition flex items-center justify-center gap-2">
+            Se connecter avec Discord
+        </button>
+    </div>
+
+    <div id="dashboard" class="hidden w-full max-w-4xl p-6">
+        <div class="bg-[#2c2f33] rounded-xl p-8 shadow-2xl border border-gray-700">
+            <div class="flex justify-between items-center mb-8">
+                <h2 id="welcome" class="text-3xl font-bold text-indigo-400">Chargement...</h2>
+                <button onclick="logout()" class="text-xs bg-red-500/20 hover:bg-red-500/40 text-red-400 px-4 py-2 rounded transition">Déconnexion</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-[#23272a] p-6 rounded-lg border-l-4 border-indigo-500">
+                    <p class="text-gray-400 text-xs uppercase font-bold tracking-widest">Utilisateur</p>
+                    <p id="username" class="text-xl mt-1 font-mono">---</p>
+                </div>
+                <div class="bg-[#23272a] p-6 rounded-lg border-l-4 border-green-500">
+                    <p class="text-gray-400 text-xs uppercase font-bold tracking-widest">ID Discord</p>
+                    <p id="userid" class="text-xl mt-1 font-mono">---</p>
+                </div>
+            </div>
+
+            <div class="mt-8 p-4 bg-yellow-500/10 border border-yellow-500/50 rounded-lg text-yellow-200 text-sm">
+                <strong>Note :</strong> Puisque ce site est sur GitHub Pages (statique), il ne peut pas modifier les fichiers du bot directement sans une API backend.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLIENT_ID = '1463590408662810677';
+        const REDIRECT_URI = 'https://jojolm24.github.io/bot/';
+
+        function loginWithDiscord() {
+            // Utilisation du mode "token" (Implicit Grant) pour GitHub Pages
+            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+            window.location.href = url;
+        }
+
+        function logout() {
+            localStorage.removeItem('ds_token');
+            window.location.href = REDIRECT_URI;
+        }
+
+        window.onload = () => {
+            // Vérifier si le token est dans l'URL (après retour de Discord)
+            const hash = window.location.hash.slice(1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+
+            if (accessToken) {
+                localStorage.setItem('ds_token', accessToken);
+                // Nettoyer l'URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                loadUserData(accessToken);
+            } else {
+                const savedToken = localStorage.getItem('ds_token');
+                if (savedToken) loadUserData(savedToken);
+            }
+        };
+
+        async function loadUserData(token) {
+            try {
+                const response = await fetch('https://discord.com/api/users/@me', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const user = await response.json();
+
+                if (user.id) {
+                    document.getElementById('login-card').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('welcome').innerText = `Content de te revoir, ${user.username}`;
+                    document.getElementById('username').innerText = user.username;
+                    document.getElementById('userid').innerText = user.id;
+                } else {
+                    logout();
+                }
+            } catch (err) {
+                console.error(err);
+                logout();
+            }
+        }
+    </script>
+</body>
+</html>
