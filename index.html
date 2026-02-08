@@ -3,233 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOD MODE DASHBOARD | JojoLM24</title>
+    <title>GOD MODE Stats | JojoLM24</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        :root { --neon: #5865F2; --accent: #eb459e; }
-        body { background: #050505; color: white; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
-        .orbitron { font-family: 'Orbitron', sans-serif; }
-
-        /* Animation de fond Scanline */
-        body::before {
-            content: " "; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%; z-index: 100; pointer-events: none;
+        /* --- DESIGN SYSTEM --- */
+        :root {
+            --primary: #5865F2;
+            --glass: rgba(13, 14, 20, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .neon-border { border: 1px solid var(--neon); box-shadow: 0 0 15px rgba(88, 101, 242, 0.3); }
-        
-        /* Style de la Carte d'Identité pour le téléchargement */
-        #id-card-capture {
-            position: absolute; left: -9999px; width: 500px; height: 300px;
-            background: linear-gradient(135deg, #1a1c24 0%, #050505 100%);
-            border: 2px solid var(--neon); border-radius: 20px; padding: 25px;
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(88, 101, 242, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(235, 69, 158, 0.1) 0%, transparent 40%);
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .live-dot { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; animation: pulse 2s infinite; }
+        /* Scrollbar custom */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: #000; }
+
+        /* Effets de Verre */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        /* Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .online-dot::before {
+            content: ''; absolute; width: 100%; height: 100%;
+            background: #22c55e; border-radius: 50%;
+            animation: pulse-ring 2s infinite;
+        }
+
+        /* --- HACKER MODE CSS --- */
+        .hacker-mode {
+            background-color: #000 !important;
+            color: #0f0 !important;
+            font-family: 'Share Tech Mono', monospace !important;
+            background-image: linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .hacker-mode .glass {
+            background: black; border: 1px solid #0f0; box-shadow: none;
+        }
+        .hacker-mode img { filter: grayscale(100%) brightness(0.8) sepia(100%) hue-rotate(50deg) saturate(5); }
+        .hacker-mode .text-indigo-400, .hacker-mode .text-pink-500 { color: #0f0 !important; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body>
 
     <audio id="bg-music" loop>
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="id-card-capture">
-        <div class="flex justify-between items-start">
-            <div class="flex gap-4 items-center">
-                <img id="cap-avatar" src="" class="w-20 h-20 rounded-xl border-2 border-indigo-500">
-                <div>
-                    <h2 id="cap-name" class="text-2xl font-bold text-white uppercase">User</h2>
-                    <p id="cap-id" class="text-indigo-400 font-mono text-xs">ID: 000</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <p class="text-xs text-gray-500">RANG</p>
-                <p id="cap-rank" class="text-4xl font-black text-indigo-500 italic">S</p>
-            </div>
-        </div>
-        <div class="mt-10 grid grid-cols-3 gap-4">
-            <div class="text-center bg-white/5 p-2 rounded">
-                <p class="text-[10px] text-gray-400">SCORE</p>
-                <p id="cap-score" class="text-lg font-bold">0</p>
-            </div>
-            <div class="text-center bg-white/5 p-2 rounded">
-                <p class="text-[10px] text-gray-400">GUILDS</p>
-                <p id="cap-guilds" class="text-lg font-bold">0</p>
-            </div>
-            <div class="text-center bg-white/5 p-2 rounded">
-                <p class="text-[10px] text-gray-400">AGE</p>
-                <p id="cap-age" class="text-lg font-bold">0</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="login-box" class="min-h-screen flex items-center justify-center">
-        <div class="glass p-12 rounded-[2rem] text-center max-w-sm neon-border">
-            <div class="text-6xl mb-6">🛰️</div>
-            <h1 class="orbitron text-4xl font-bold mb-4 tracking-tighter">NEON<span class="text-indigo-500">STATS</span></h1>
-            <p class="text-gray-400 mb-8 text-sm">Prêt pour l'analyse orbitale de votre profil ?</p>
-            <button onclick="login()" class="w-full bg-[#5865F2] hover:bg-white hover:text-black py-4 rounded-xl font-bold transition-all shadow-lg">
-                ACTIVER LA CONNEXION
+    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center relative z-50">
+        <div class="glass p-12 rounded-[2rem] text-center max-w-md w-full relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+            
+            <div class="text-7xl mb-6 animate-bounce">🚀</div>
+            <h1 class="text-5xl font-bold mb-2 tracking-tighter">GOD<span class="text-indigo-500">MODE</span></h1>
+            <p class="text-gray-400 mb-8 font-mono text-sm">ANALYSEUR DE PROFIL DISCORD V3.0</p>
+            
+            <button onclick="login()" class="relative w-full py-4 bg-[#5865F2] hover:bg-[#4752C4] rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-lg shadow-indigo-500/30">
+                <i class="fab fa-discord text-2xl"></i> LOGIN
             </button>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden max-w-6xl mx-auto space-y-6">
+    <div id="dashboard" class="hidden min-h-screen p-4 md:p-8 max-w-7xl mx-auto space-y-6">
         
-        <header class="glass rounded-[2rem] p-6 flex flex-col md:flex-row justify-between items-center gap-6 border-b-2 border-indigo-500">
-            <div class="flex items-center gap-6">
+        <header class="glass rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
+            <div id="banner-bg" class="absolute inset-0 opacity-20 bg-center bg-cover z-0"></div>
+
+            <div class="flex items-center gap-6 z-10 w-full md:w-auto">
                 <div class="relative">
-                    <img id="avatar" src="" class="w-24 h-24 rounded-2xl border-2 border-indigo-500">
-                    <div class="absolute -bottom-2 -right-2 bg-black p-1 rounded-full"><div class="live-dot"></div></div>
-                </div>
-                <div>
-                    <h2 id="username" class="orbitron text-3xl font-bold tracking-widest">---</h2>
-                    <div class="flex gap-2 mt-2">
-                        <span id="rank-tag" class="px-2 py-1 bg-indigo-500/20 text-indigo-400 text-xs font-bold rounded border border-indigo-500/30">RANK: ?</span>
-                        <span id="score-tag" class="px-2 py-1 bg-pink-500/20 text-pink-400 text-xs font-bold rounded border border-pink-500/30">SCORE: 0</span>
+                    <img id="avatar" src="" class="w-24 h-24 rounded-2xl border-4 border-[#0f0f0f] shadow-2xl">
+                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-[#0f0f0f] rounded-full flex items-center justify-center">
+                        <div class="w-5 h-5 bg-green-500 rounded-full online-dot relative"></div>
                     </div>
                 </div>
+                <div>
+                    <h2 id="username" class="text-4xl font-bold leading-none">User</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span id="userid" class="font-mono text-xs opacity-50 bg-black/30 px-2 py-1 rounded">ID: 0000</span>
+                        <span id="nitro-badge" class="hidden px-2 py-1 bg-pink-500/20 text-pink-400 text-xs font-bold rounded border border-pink-500/30">NITRO</span>
+                    </div>
+                    <div id="badges-container" class="flex gap-2 mt-3 text-lg"></div>
+                </div>
             </div>
-            <div class="flex gap-3">
-                <button onclick="downloadCard()" class="px-6 py-3 bg-indigo-600 hover:bg-white hover:text-black rounded-xl font-bold transition flex items-center gap-2">
-                    <i class="fas fa-id-card"></i> GENERER L'ID CARD
+
+            <div class="flex gap-3 z-10">
+                <button onclick="toggleMusic()" id="music-btn" class="p-4 rounded-xl glass hover:bg-white/10 transition" title="Activer Musique LoFi">
+                    <i class="fas fa-play"></i>
                 </button>
-                <button onclick="logout()" class="p-4 text-red-400 hover:bg-red-500 hover:text-white rounded-xl transition">
+                <button onclick="toggleHackerMode()" class="p-4 rounded-xl glass hover:bg-green-500/20 hover:text-green-400 transition" title="HACKER MODE">
+                    <i class="fas fa-terminal"></i>
+                </button>
+                <button onclick="logout()" class="p-4 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition border border-red-500/20">
                     <i class="fas fa-power-off"></i>
                 </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition">
-                <h3 class="text-xs text-gray-500 uppercase font-bold mb-2 tracking-widest">Ancienneté</h3>
-                <p id="stat-age" class="text-3xl font-black">0 Ans</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="glass p-6 rounded-3xl relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 text-8xl opacity-5 rotate-12"><i class="fas fa-history"></i></div>
+                <h3 class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">Ancienneté</h3>
+                <p id="account-age" class="text-3xl font-bold text-indigo-400">0 Ans</p>
+                <p id="creation-date" class="text-xs text-gray-500 mt-1">...</p>
             </div>
-            <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition">
-                <h3 class="text-xs text-gray-500 uppercase font-bold mb-2 tracking-widest">Serveurs</h3>
-                <p id="stat-guilds" class="text-3xl font-black">0</p>
+
+            <div class="glass p-6 rounded-3xl relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 text-8xl opacity-5 rotate-12"><i class="fas fa-server"></i></div>
+                <h3 class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">Serveurs</h3>
+                <div class="flex items-baseline gap-2">
+                    <p id="guild-count" class="text-4xl font-bold text-white">0</p>
+                    <span class="text-sm text-gray-500">rejoints</span>
+                </div>
             </div>
-            <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition">
-                <h3 class="text-xs text-gray-500 uppercase font-bold mb-2 tracking-widest">Admins</h3>
-                <p id="stat-admins" class="text-3xl font-black">0</p>
+
+            <div class="glass p-6 rounded-3xl relative overflow-hidden border-orange-500/30">
+                <div class="absolute -right-4 -top-4 text-8xl opacity-5 rotate-12 text-orange-500"><i class="fas fa-crown"></i></div>
+                <h3 class="text-orange-400 text-sm font-bold uppercase tracking-widest mb-2">Niveau Admin</h3>
+                <p id="admin-count" class="text-4xl font-bold text-white">0</p>
+                <p class="text-xs text-gray-500 mt-1">Serveurs gérés</p>
             </div>
-            <div class="glass p-6 rounded-2xl text-center hover:scale-105 transition">
-                <h3 class="text-xs text-gray-500 uppercase font-bold mb-2 tracking-widest">Nitro</h3>
-                <p id="stat-nitro" class="text-3xl font-black text-pink-500">NON</p>
+
+            <div class="glass p-6 rounded-3xl flex flex-col justify-center items-center text-center cursor-pointer hover:bg-white/5 transition" onclick="alert('Fonctionnalité Image Bientôt !')">
+                <i class="fas fa-id-card text-4xl mb-2 text-blue-400"></i>
+                <span class="text-sm font-bold">Télécharger ID Card</span>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 glass p-8 rounded-[2rem]">
-                <h3 class="orbitron text-xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-shield-alt text-indigo-500"></i> Vos Serveurs de Pouvoir</h3>
-                <div id="guild-list" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            
+            <div class="lg:col-span-2 glass rounded-3xl p-8">
+                <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                    <i class="fas fa-globe text-indigo-500"></i> Serveurs Principaux
+                </h3>
+                <div id="server-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[400px] overflow-y-auto pr-2">
                     </div>
             </div>
-            <div class="glass p-8 rounded-[2rem] flex flex-col justify-between">
+
+            <div id="json-panel" class="hidden glass rounded-3xl p-6 font-mono text-xs overflow-auto h-[500px] border-green-500/50 bg-black">
+                <h3 class="text-green-500 mb-2">> RAW_DATA_STREAM.json</h3>
+                <pre id="json-content" class="text-green-400 whitespace-pre-wrap"></pre>
+            </div>
+
+            <div id="info-panel" class="glass rounded-3xl p-8 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">🎵 Vibe Zone</h3>
-                    <p class="text-xs text-gray-400 mb-6">Activez l'ambiance Lo-Fi pour votre analyse.</p>
-                    <button onclick="toggleMusic()" id="music-btn" class="w-full py-3 border border-white/20 rounded-xl hover:bg-white/10 transition">
-                        <i class="fas fa-play"></i> PLAY LO-FI
-                    </button>
+                    <h3 class="text-xl font-bold mb-4">💡 Le saviez-vous ?</h3>
+                    <ul class="space-y-4 text-sm text-gray-300">
+                        <li class="flex gap-3"><i class="fas fa-check text-green-400"></i> Votre token est stocké uniquement en local.</li>
+                        <li class="flex gap-3"><i class="fas fa-check text-green-400"></i> Le statut "En ligne" est simulé (API limitation).</li>
+                        <li class="flex gap-3"><i class="fas fa-check text-green-400"></i> Le "Hacker Mode" montre ce que Discord sait de vous.</li>
+                    </ul>
                 </div>
-                <div class="mt-8 pt-8 border-t border-white/10">
-                    <p class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">System Status: OK</p>
-                </div>
+                <a href="https://discord.com/api/oauth2/authorize?client_id=1463590408662810677&permissions=8&scope=bot" target="_blank" class="mt-6 w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl text-center font-bold transition flex items-center justify-center gap-2">
+                    <i class="fas fa-robot"></i> Inviter le Bot
+                </a>
             </div>
         </div>
     </div>
 
     <script>
         const CLIENT_ID = '1463590408662810677';
-        const REDIRECT_URI = 'https://jojolm24.github.io/bot/';
+        // ⚠️ REMPLACE PAR TON URL
+        const REDIRECT_URI = 'https://jojolm24.github.io/bot/'; 
+
+        let userRawData = {};
+        let isHackerMode = false;
+        let isMusicPlaying = false;
 
         function login() {
-            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify+guilds`;
+            // Scope 'guilds' obligatoire pour compter les serveurs et admins
+            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify+guilds`;
+            window.location.href = url;
         }
 
-        function logout() { localStorage.clear(); window.location.href = REDIRECT_URI; }
+        function logout() {
+            localStorage.clear();
+            window.location.href = REDIRECT_URI;
+        }
 
+        // --- FONCTIONS UI ---
+        
         function toggleMusic() {
             const audio = document.getElementById('bg-music');
             const btn = document.getElementById('music-btn');
-            if(audio.paused) { audio.play(); btn.innerHTML = '<i class="fas fa-pause"></i> PAUSE'; }
-            else { audio.pause(); btn.innerHTML = '<i class="fas fa-play"></i> PLAY LO-FI'; }
+            if(isMusicPlaying) {
+                audio.pause();
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                btn.classList.remove('text-green-400', 'animate-pulse');
+            } else {
+                audio.play();
+                btn.innerHTML = '<i class="fas fa-pause"></i>';
+                btn.classList.add('text-green-400', 'animate-pulse');
+            }
+            isMusicPlaying = !isMusicPlaying;
         }
 
-        async function downloadCard() {
-            const container = document.getElementById('id-card-capture');
-            const canvas = await html2canvas(container, { useCORS: true, backgroundColor: null });
-            const link = document.createElement('a');
-            link.download = 'discord-id-card.png';
-            link.href = canvas.toDataURL();
-            link.click();
+        function toggleHackerMode() {
+            isHackerMode = !isHackerMode;
+            if(isHackerMode) {
+                document.body.classList.add('hacker-mode');
+                document.getElementById('info-panel').classList.add('hidden');
+                document.getElementById('json-panel').classList.remove('hidden');
+            } else {
+                document.body.classList.remove('hacker-mode');
+                document.getElementById('info-panel').classList.remove('hidden');
+                document.getElementById('json-panel').classList.add('hidden');
+            }
         }
+
+        // --- CORE LOGIC ---
 
         window.onload = async () => {
             const params = new URLSearchParams(window.location.hash.slice(1));
-            const token = params.get('access_token') || localStorage.getItem('token');
+            const token = params.get('access_token') || localStorage.getItem('access_token');
 
             if (token) {
-                localStorage.setItem('token', token);
+                localStorage.setItem('access_token', token);
                 window.history.replaceState({}, document.title, window.location.pathname);
-                document.getElementById('login-box').classList.add('hidden');
+                
+                document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 
-                // Fetch Data
-                const user = await (await fetch('https://discord.com/api/users/@me', {headers:{Authorization:`Bearer ${token}`}})).json();
-                const guilds = await (await fetch('https://discord.com/api/users/@me/guilds', {headers:{Authorization:`Bearer ${token}`}})).json();
-
-                // Calculs
-                const creationDate = Number((BigInt(user.id) >> 22n) + 1420070400000n);
-                const age = ((new Date() - new Date(creationDate)) / (1000 * 60 * 60 * 24 * 365)).toFixed(1);
-                const admins = guilds.filter(g => (BigInt(g.permissions) & 0x8n) === 0x8n || g.owner).length;
-                
-                // Score & Rank
-                let score = Math.floor((age * 100) + (guilds.length * 5) + (admins * 20));
-                if(user.premium_type > 0) score += 500;
-                let rank = score > 2000 ? 'S+' : (score > 1000 ? 'A' : (score > 500 ? 'B' : 'C'));
-
-                // Update UI
-                document.getElementById('username').innerText = user.username;
-                document.getElementById('stat-age').innerText = age + " Ans";
-                document.getElementById('stat-guilds').innerText = guilds.length;
-                document.getElementById('stat-admins').innerText = admins;
-                document.getElementById('stat-nitro').innerText = user.premium_type > 0 ? "OUI" : "NON";
-                document.getElementById('score-tag').innerText = `SCORE: ${score}`;
-                document.getElementById('rank-tag').innerText = `RANK: ${rank}`;
-                
-                const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=256` : `https://cdn.discordapp.com/embed/avatars/0.png`;
-                document.getElementById('avatar').src = avatarUrl;
-
-                // Update Capture Card
-                document.getElementById('cap-avatar').src = avatarUrl;
-                document.getElementById('cap-name').innerText = user.username;
-                document.getElementById('cap-id').innerText = `ID: ${user.id}`;
-                document.getElementById('cap-rank').innerText = rank;
-                document.getElementById('cap-score').innerText = score;
-                document.getElementById('cap-guilds').innerText = guilds.length;
-                document.getElementById('cap-age').innerText = age;
-
-                // Render Guilds
-                const list = document.getElementById('guild-list');
-                guilds.filter(g => (BigInt(g.permissions) & 0x8n) === 0x8n || g.owner).slice(0, 8).forEach(g => {
-                    const icon = g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : '';
-                    list.innerHTML += `<div class="bg-black/40 p-3 rounded-xl border border-white/5 text-[10px] font-bold flex items-center gap-2 truncate">
-                        ${icon ? `<img src="${icon}" class="w-6 h-6 rounded">` : `<div class="w-6 h-6 bg-indigo-500 rounded flex items-center justify-center">${g.name[0]}</div>`}
-                        ${g.name}
-                    </div>`;
-                });
+                await loadData(token);
             }
         };
+
+        async function loadData(token) {
+            try {
+                // 1. Fetch User
+                const userRes = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` }});
+                const user = await userRes.json();
+                userRawData.user = user;
+
+                // 2. Fetch Guilds
+                const guildsRes = await fetch('https://discord.com/api/users/@me/guilds', { headers: { Authorization: `Bearer ${token}` }});
+                const guilds = await guildsRes.json();
+                userRawData.guilds = guilds;
+
+                // Affichage JSON pour le mode Hacker
+                document.getElementById('json-content').innerText = JSON.stringify(userRawData, null, 2);
+
+                // --- REMPLISSAGE UI ---
+                document.getElementById('username').innerText = user.username;
+                document.getElementById('userid').innerText = `ID: ${user.id}`;
+                
+                // Avatar
+                const avatarUrl = user.avatar 
+                    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=512`
+                    : `https://cdn.discordapp.com/embed/avatars/${user.id % 5}.png`;
+                document.getElementById('avatar').src = avatarUrl;
+                
+                // Banner Background
+                if(user.banner) {
+                    const bannerUrl = `https://cdn.discordapp.com/banners/${user.id}/${user.banner}.jpg?size=1024`;
+                    document.getElementById('banner-bg').style.backgroundImage = `url(${bannerUrl})`;
+                }
+
+                // Nitro Check (Approximation via premium_type)
+                if(user.premium_type > 0) document.getElementById('nitro-badge').classList.remove('hidden');
+
+                // Calcul Age (Snowflake)
+                const created = Number((BigInt(user.id) >> 22n) + 1420070400000n);
+                const date = new Date(created);
+                const now = new Date();
+                const years = ((now - date) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
+                
+                document.getElementById('account-age').innerText = `${years} Ans`;
+                document.getElementById('creation-date').innerText = date.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+                // Badges
+                renderBadges(user.public_flags || 0);
+
+                // Serveurs Stats
+                document.getElementById('guild-count').innerText = guilds.length;
+
+                // Calcul "Admin Power" (Permissions bitwise check: 0x8 = Administrator)
+                // Note: L'API user/guilds renvoie une version simplifiée des permissions
+                let adminCount = 0;
+                const serverList = document.getElementById('server-list');
+                
+                guilds.forEach(g => {
+                    const isAdmin = (BigInt(g.permissions) & 0x8n) === 0x8n || g.owner;
+                    if(isAdmin) adminCount++;
+
+                    // Affiche seulement les 20 premiers pour pas laguer
+                    if(serverList.children.length < 20) {
+                        const icon = g.icon 
+                            ? `<img src="https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png" class="w-10 h-10 rounded-full">`
+                            : `<div class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center text-xs font-bold">${g.name[0]}</div>`;
+                        
+                        serverList.innerHTML += `
+                            <div class="glass p-3 rounded-xl flex items-center gap-3 hover:bg-white/10 transition border ${isAdmin ? 'border-orange-500/30' : 'border-transparent'}">
+                                ${icon}
+                                <div class="overflow-hidden">
+                                    <p class="text-xs font-bold truncate text-white">${g.name}</p>
+                                    <p class="text-[10px] ${isAdmin ? 'text-orange-400' : 'text-gray-500'} uppercase font-bold">
+                                        ${g.owner ? 'PROPRIÉTAIRE 👑' : (isAdmin ? 'ADMINISTRATEUR 🛡️' : 'MEMBRE')}
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                document.getElementById('admin-count').innerText = adminCount;
+
+            } catch (e) {
+                console.error(e);
+                // logout(); // Décommenter en prod
+            }
+        }
+
+        function renderBadges(flags) {
+            const container = document.getElementById('badges-container');
+            const badges = [
+                { bit: 1, icon: 'fa-user-shield', color: 'text-blue-400' }, // Staff
+                { bit: 4194304, icon: 'fa-robot', color: 'text-blue-500' }, // Active Dev
+                { bit: 131072, icon: 'fa-code', color: 'text-blue-300' }, // Dev
+                { bit: 4, icon: 'fa-star', color: 'text-orange-400' }, // HypeSquad
+            ];
+            
+            badges.forEach(b => {
+                if((flags & b.bit) === b.bit) {
+                    container.innerHTML += `<i class="fas ${b.icon} ${b.color}"></i>`;
+                }
+            });
+        }
     </script>
 </body>
 </html>
